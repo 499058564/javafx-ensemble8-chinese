@@ -125,23 +125,16 @@ public class EnsembleApp extends Application {
     @Override public void init() throws Exception {
         //加载英文到中文的映射配置
         initMappingChinese();
-        // CREATE ROOT
         root = initRootPane();
-        // CREATE MENUBAR
         if (SHOW_MENU) {
             initShowMenu();
         }
-        // CREATE TOOLBAR
         initToolBar();
-        // create PageBrowser
         initPageBrowser();
-        // wire nav buttons
         initToolBarBtns();
-        // create AndroidStyle menu handling
         if (IS_ANDROID) {
             initAndroidStyle();
         }
-        // create and setup search popover
        initSearchPopover();
     }
 
@@ -269,6 +262,7 @@ public class EnsembleApp extends Application {
         sampleListPopover = new Popover();
         sampleListPopover.setPrefWidth(440);
         root.getChildren().add(sampleListPopover);
+        //首页的示例列表
         rootPage = new SamplePopoverTreeList(Samples.ROOT,pageBrowser);
         listButton.setOnMouseClicked((MouseEvent e) -> {
             if(sampleListPopover.isVisible()){
@@ -276,6 +270,7 @@ public class EnsembleApp extends Application {
                 return;
             }
             sampleListPopover.clearPages();
+            //将页面放置进入列表的时候才会进行初始化
             sampleListPopover.pushPage(rootPage);
             sampleListPopover.show(() -> {
                 listButton.setSelected(false);

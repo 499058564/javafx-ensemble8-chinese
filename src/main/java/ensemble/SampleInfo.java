@@ -66,6 +66,8 @@ public class SampleInfo {
 
     // =============== BASICS ==================================================
     public final String name;
+    //TODO yzy 增加显示名称,防止原有逻辑被更改
+    public final String displayName;
     public final String description;
     public final String ensemblePath;
 
@@ -103,9 +105,11 @@ public class SampleInfo {
                   PlaygroundProperty[] playgroundProperties, ConditionalFeature[] conditionalFeatures,
                   boolean runsOnEmbedded) {
         //TODO yzy 替换英文为中文
-        //System.out.println(String.format("%s=" , replaceAllSpecialStr(description)));
-        this.name = translatorOfChinese(name);
-        this.description = translatorOfChinese(description);
+
+        //TODO yzy 显示名称初始化
+        this.displayName = ChineseAndEnglishController.translatorOfChinese(name);
+        this.name = name;
+        this.description = ChineseAndEnglishController.translatorOfChinese(description);
         this.ensemblePath = ensemblePath;
         this.baseUri = baseUri;
         this.appClass = appClass;
@@ -137,23 +141,7 @@ public class SampleInfo {
         this.previewUrl = previewUrl;
     }
 
-    private String replaceAllSpecialStr(String key){
-        String replaceWith = "_";
-        String[] specials = {" " , ":" , "," , "."};
-        String replace = key;
-        for (String str : specials){
-            replace = replace.replace(str , replaceWith);
-        }
-        return replace;
-    }
 
-    private String translatorOfChinese(String key){
-        final String property = EnsembleApp.nameProperties.getProperty(replaceAllSpecialStr(key));
-        if(StringUtils.isNoneEmpty(property)){
-            key = property;
-        }
-        return key;
-    }
 
     @Override public String toString() {
         return name;
@@ -246,6 +234,10 @@ public class SampleInfo {
     }
     private static final Image SAMPLE_BACKGROUND = getImage(
             SampleInfo.class.getResource("images/sample-background.png").toExternalForm());
+
+    /**
+     * 首页中的轮播图
+     */
     private class LargePreviewRegion extends Region {
         private final Node sampleNode = buildSampleNode().getSampleNode();
         private final Label label = new Label();
@@ -253,7 +245,9 @@ public class SampleInfo {
 
         public LargePreviewRegion() {
             getStyleClass().add("sample-large-preview");
-            label.setText(name);
+            //TODO yzy 首页轮播图各项的显示名称
+            //label.setText(name);
+            label.setText(displayName);
             label.getStyleClass().add("sample-large-preview-label");
             label.setAlignment(Pos.BOTTOM_CENTER);
             label.setWrapText(true);
