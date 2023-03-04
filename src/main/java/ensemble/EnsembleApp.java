@@ -122,84 +122,13 @@ public class EnsembleApp extends Application {
             System.err.println("加载englishMappingChinese.properties文件失败");
         }
         // CREATE ROOT
-        root = new Pane() {
-            @Override protected void layoutChildren() {
-                super.layoutChildren();
-                final double w = getWidth();
-                final double h = getHeight();
-                final double menuHeight = SHOW_MENU ? menuBar.prefHeight(w) : 0;
-                final double toolBarHeight = toolBar.prefHeight(w);
-                if (menuBar != null) {
-                    menuBar.resize(w, menuHeight);
-                }
-                toolBar.resizeRelocate(0, menuHeight, w, toolBarHeight);
-                pageBrowser.setLayoutY(toolBarHeight + menuHeight);
-                pageBrowser.resize(w, h-toolBarHeight);
-                pageBrowser.resize(w, h - toolBarHeight - menuHeight);
-                sampleListPopover.autosize();
-                Point2D listBtnBottomCenter = listButton.localToScene(listButton.getWidth()/2, listButton.getHeight());
-                sampleListPopover.setLayoutX((int)listBtnBottomCenter.getX()-50);
-                sampleListPopover.setLayoutY((int)listBtnBottomCenter.getY()+20);
-                Point2D searchBoxBottomCenter = searchBox.localToScene(searchBox.getWidth()/2, searchBox.getHeight());
-                searchPopover.setLayoutX((int)searchBoxBottomCenter.getX()-searchPopover.getLayoutBounds().getWidth()+50);
-                searchPopover.setLayoutY((int)searchBoxBottomCenter.getY()+20);
-            }
-        };
+        root = initRootPane();
         // CREATE MENUBAR
         if (SHOW_MENU) {
-            menuBar = new MenuBar();
-            menuBar.setUseSystemMenuBar(true);
-            ToggleGroup screenSizeToggle = new ToggleGroup();
-            Menu menu = new Menu("Screen size");
-            menu.getItems().addAll(
-                    screenSizeMenuItem("iPad Landscape", 1024, 768, false, screenSizeToggle),
-                    screenSizeMenuItem("iPad Portrait", 768, 1024, false, screenSizeToggle),
-                    screenSizeMenuItem("Beagleboard", 1024, 600, false, screenSizeToggle),
-                    screenSizeMenuItem("iPad Retina Landscape", 2048, 1536, true, screenSizeToggle),
-                    screenSizeMenuItem("iPad Retina Portrait", 1536, 2048, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone Landscape", 480, 320, false, screenSizeToggle),
-                    screenSizeMenuItem("iPhone Portrait", 320, 480, false, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 4 Landscape", 960, 640, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 4 Portrait", 640, 960, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 5 Landscape", 1136, 640, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 5 Portrait", 640, 1136, true, screenSizeToggle));
-            menuBar.getMenus().add(menu);
-            screenSizeToggle.selectToggle(screenSizeToggle.getToggles().get(0));
-
-            //TODO yzy 暂时注释
-            //root.getChildren().add(menuBar);
+            initShowMenu();
         }
         // CREATE TOOLBAR
-        toolBar = new TitledToolBar();
-        root.getChildren().add(toolBar);
-        backButton = new Button();
-        backButton.setId("back");
-        backButton.getStyleClass().add("left-pill");
-        backButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        forwardButton = new Button();
-        forwardButton.setId("forward");
-        forwardButton.getStyleClass().add("center-pill");
-        forwardButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        homeButton = new Button();
-        homeButton.setId("home");
-        homeButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        homeButton.getStyleClass().add("right-pill");
-        HBox navButtons = new HBox(0,backButton,forwardButton,homeButton);
-        listButton = new ToggleButton();
-        listButton.setId("list");
-        listButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        HBox.setMargin(listButton, new Insets(0, 0, 0, 7));
-        searchButton = new ToggleButton();
-        searchButton.setId("search");
-        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        searchBox.setPrefWidth(200);
-        backButton.setGraphic(new Region());
-        forwardButton.setGraphic(new Region());
-        homeButton.setGraphic(new Region());
-        listButton.setGraphic(new Region());
-        searchButton.setGraphic(new Region());
-        toolBar.addLeftItems(navButtons,listButton);
-        toolBar.addRightItems(searchBox);
+        initToolBar();
 
         // create PageBrowser
         pageBrowser = new PageBrowser();
@@ -283,6 +212,87 @@ public class EnsembleApp extends Application {
         // create and setup search popover
         searchPopover = new SearchPopover(searchBox,pageBrowser);
         root.getChildren().add(searchPopover);
+    }
+
+    private Pane initRootPane(){
+        return new Pane() {
+            @Override protected void layoutChildren() {
+                super.layoutChildren();
+                final double w = getWidth();
+                final double h = getHeight();
+                final double menuHeight = SHOW_MENU ? menuBar.prefHeight(w) : 0;
+                final double toolBarHeight = toolBar.prefHeight(w);
+                if (menuBar != null) {
+                    menuBar.resize(w, menuHeight);
+                }
+                toolBar.resizeRelocate(0, menuHeight, w, toolBarHeight);
+                pageBrowser.setLayoutY(toolBarHeight + menuHeight);
+                pageBrowser.resize(w, h-toolBarHeight);
+                pageBrowser.resize(w, h - toolBarHeight - menuHeight);
+                sampleListPopover.autosize();
+                Point2D listBtnBottomCenter = listButton.localToScene(listButton.getWidth()/2, listButton.getHeight());
+                sampleListPopover.setLayoutX((int)listBtnBottomCenter.getX()-50);
+                sampleListPopover.setLayoutY((int)listBtnBottomCenter.getY()+20);
+                Point2D searchBoxBottomCenter = searchBox.localToScene(searchBox.getWidth()/2, searchBox.getHeight());
+                searchPopover.setLayoutX((int)searchBoxBottomCenter.getX()-searchPopover.getLayoutBounds().getWidth()+50);
+                searchPopover.setLayoutY((int)searchBoxBottomCenter.getY()+20);
+            }
+        };
+    }
+
+    private void initShowMenu(){
+        menuBar = new MenuBar();
+        menuBar.setUseSystemMenuBar(true);
+        ToggleGroup screenSizeToggle = new ToggleGroup();
+        Menu menu = new Menu("Screen size");
+        menu.getItems().addAll(
+                screenSizeMenuItem("iPad Landscape", 1024, 768, false, screenSizeToggle),
+                screenSizeMenuItem("iPad Portrait", 768, 1024, false, screenSizeToggle),
+                screenSizeMenuItem("Beagleboard", 1024, 600, false, screenSizeToggle),
+                screenSizeMenuItem("iPad Retina Landscape", 2048, 1536, true, screenSizeToggle),
+                screenSizeMenuItem("iPad Retina Portrait", 1536, 2048, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone Landscape", 480, 320, false, screenSizeToggle),
+                screenSizeMenuItem("iPhone Portrait", 320, 480, false, screenSizeToggle),
+                screenSizeMenuItem("iPhone 4 Landscape", 960, 640, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 4 Portrait", 640, 960, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 5 Landscape", 1136, 640, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 5 Portrait", 640, 1136, true, screenSizeToggle));
+        menuBar.getMenus().add(menu);
+        screenSizeToggle.selectToggle(screenSizeToggle.getToggles().get(0));
+        root.getChildren().add(menuBar);
+    }
+
+    private void initToolBar(){
+        toolBar = new TitledToolBar();
+        root.getChildren().add(toolBar);
+        backButton = new Button();
+        backButton.setId("back");
+        backButton.getStyleClass().add("left-pill");
+        backButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        forwardButton = new Button();
+        forwardButton.setId("forward");
+        forwardButton.getStyleClass().add("center-pill");
+        forwardButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        homeButton = new Button();
+        homeButton.setId("home");
+        homeButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        homeButton.getStyleClass().add("right-pill");
+        HBox navButtons = new HBox(0,backButton,forwardButton,homeButton);
+        listButton = new ToggleButton();
+        listButton.setId("list");
+        listButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        HBox.setMargin(listButton, new Insets(0, 0, 0, 7));
+        searchButton = new ToggleButton();
+        searchButton.setId("search");
+        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        searchBox.setPrefWidth(200);
+        backButton.setGraphic(new Region());
+        forwardButton.setGraphic(new Region());
+        homeButton.setGraphic(new Region());
+        listButton.setGraphic(new Region());
+        searchButton.setGraphic(new Region());
+        toolBar.addLeftItems(navButtons,listButton);
+        toolBar.addRightItems(searchBox);
     }
 
     private RadioMenuItem screenSizeMenuItem(String text, final int width, final int height, final boolean retina, ToggleGroup tg) {
