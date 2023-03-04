@@ -36,13 +36,13 @@ import ensemble.control.Popover;
 import ensemble.control.SearchBox;
 import ensemble.control.TitledToolBar;
 import ensemble.generated.Samples;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -99,6 +99,9 @@ public class EnsembleApp extends Application {
     private SearchPopover searchPopover;
     private MenuBar menuBar;
 
+    private static final String ENGLISH_MAPPING_CHINESE = "/nameEnglishMappingChinese.properties";
+    public static Properties nameProperties;
+
     static {
         System.setProperty("java.net.useSystemProxies", "true");
         Logger.getLogger(EnsembleApp.class.getName()).finer("IS_IPHONE = " + IS_IPHONE);
@@ -110,6 +113,14 @@ public class EnsembleApp extends Application {
     }
 
     @Override public void init() throws Exception {
+        //加载英文到中文的映射配置
+        nameProperties = new Properties();
+        File file = new File(EnsembleApp.class.getResource(ENGLISH_MAPPING_CHINESE).getPath());
+        try {
+            nameProperties.load(new FileInputStream(file));
+        } catch (IOException e) {
+            System.err.println("加载englishMappingChinese.properties文件失败");
+        }
         // CREATE ROOT
         root = new Pane() {
             @Override protected void layoutChildren() {
@@ -155,7 +166,8 @@ public class EnsembleApp extends Application {
             menuBar.getMenus().add(menu);
             screenSizeToggle.selectToggle(screenSizeToggle.getToggles().get(0));
 
-            root.getChildren().add(menuBar);
+            //TODO yzy 暂时注释
+            //root.getChildren().add(menuBar);
         }
         // CREATE TOOLBAR
         toolBar = new TitledToolBar();
@@ -313,7 +325,7 @@ public class EnsembleApp extends Application {
                 URL url = new URL(EXTERNAL_STYLESHEET);
                 try (
                         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                        Reader newReader = Channels.newReader(rbc, "ISO-8859-1");
+                        Reader newReader = Channels.newReader(rbc, "UTF-8");
                         BufferedReader bufferedReader = new BufferedReader(newReader)
                         ) {
                     // Checking whether we can read a line from this url
@@ -352,6 +364,7 @@ public class EnsembleApp extends Application {
         }
         stage.setTitle("Ensemble");
         stage.show();
+
     }
 
     /**
