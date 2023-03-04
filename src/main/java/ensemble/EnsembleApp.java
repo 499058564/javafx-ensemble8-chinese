@@ -44,6 +44,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -72,6 +73,7 @@ import javafx.scene.transform.Scale;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -146,6 +148,14 @@ public class EnsembleApp extends Application {
                 final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream , StandardCharsets.UTF_8)
         ){
             nameProperties.load(inputStreamReader);
+            //TODO yzy 测试使用-输出所有未翻译的部分
+            /*final Enumeration<Object> keys = nameProperties.keys();
+            while (keys.hasMoreElements()){
+                final Object o = keys.nextElement();
+                if(StringUtils.isEmpty(nameProperties.getProperty((String) o))){
+                    System.out.println(((String)o).replace("_" , " "));
+                }
+            }*/
         } catch (IOException e) {
             System.err.println("加载englishMappingChinese.properties文件失败");
         }
