@@ -42,11 +42,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -66,6 +71,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.apache.commons.io.Charsets;
 
 
 /**
@@ -95,6 +101,10 @@ public class EnsembleApp extends Application {
     private ToggleButton searchButton;
     private final SearchBox searchBox = new SearchBox();
     private PageBrowser pageBrowser;
+    private SamplePopoverTreeList rootPage;
+    /**
+     * ToolBar中的列表按钮的弹出框
+     */
     private Popover sampleListPopover;
     private SearchPopover searchPopover;
     private MenuBar menuBar;
@@ -114,13 +124,7 @@ public class EnsembleApp extends Application {
 
     @Override public void init() throws Exception {
         //加载英文到中文的映射配置
-        nameProperties = new Properties();
-        File file = new File(EnsembleApp.class.getResource(ENGLISH_MAPPING_CHINESE).getPath());
-        try {
-            nameProperties.load(new FileInputStream(file));
-        } catch (IOException e) {
-            System.err.println("加载englishMappingChinese.properties文件失败");
-        }
+        initMappingChinese();
         // CREATE ROOT
         root = initRootPane();
         // CREATE MENUBAR
@@ -129,89 +133,29 @@ public class EnsembleApp extends Application {
         }
         // CREATE TOOLBAR
         initToolBar();
-
         // create PageBrowser
-        pageBrowser = new PageBrowser();
-        toolBar.titleTextProperty().bind(pageBrowser.currentPageTitleProperty());
-        root.getChildren().add(0, pageBrowser);
-        pageBrowser.goHome();
+        initPageBrowser();
         // wire nav buttons
-        backButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.backward();
-        });
-        backButton.disableProperty().bind(pageBrowser.backPossibleProperty().not());
-        forwardButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.forward();
-        });
-        forwardButton.disableProperty().bind(pageBrowser.forwardPossibleProperty().not());
-        homeButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.goHome();
-        });
-        homeButton.disableProperty().bind(pageBrowser.atHomeProperty());
-
-        // create and setup list popover
-        sampleListPopover = new Popover();
-        sampleListPopover.setPrefWidth(440);
-        root.getChildren().add(sampleListPopover);
-        final SamplePopoverTreeList rootPage = new SamplePopoverTreeList(Samples.ROOT,pageBrowser);
-        listButton.setOnMouseClicked((MouseEvent e) -> {
-            if (sampleListPopover.isVisible()) {
-                sampleListPopover.hide();
-            } else {
-                sampleListPopover.clearPages();
-                sampleListPopover.pushPage(rootPage);
-                sampleListPopover.show(() -> {
-                    listButton.setSelected(false);
-                });
-            }
-        });
-
+        initToolBarBtns();
         // create AndroidStyle menu handling
         if (IS_ANDROID) {
-            root.setOnKeyReleased(new EventHandler<KeyEvent>() {
-                private int exitCount = 0;
-
-                @Override
-                public void handle(KeyEvent event) {
-                    if (event.getCode() == KeyCode.ESCAPE) {
-                        if (sampleListPopover.isVisible()) {
-                            sampleListPopover.hide();
-                            event.consume();
-                            return;
-                        }
-
-                        if (!backButton.isDisabled()) {
-                            pageBrowser.backward();
-                            event.consume();
-                            return;
-                        }
-                        exitCount++;
-                        if (exitCount == 2) {
-                            System.exit(0);
-                        }
-                    } else {
-                        exitCount = 0;
-                    }
-
-                    if (event.getCode() == KeyCode.CONTEXT_MENU) {
-                        if (sampleListPopover.isVisible()) {
-                            sampleListPopover.hide();
-                        } else {
-                            sampleListPopover.clearPages();
-                            sampleListPopover.pushPage(rootPage);
-                            sampleListPopover.show(() -> {
-                                listButton.setSelected(false);
-                            });
-                        }
-                        event.consume();
-                    }
-                }
-            });
+            initAndroidStyle();
         }
-
         // create and setup search popover
-        searchPopover = new SearchPopover(searchBox,pageBrowser);
-        root.getChildren().add(searchPopover);
+       initSearchPopover();
+    }
+
+    private void initMappingChinese(){
+        nameProperties = new Properties();
+        File file = new File(EnsembleApp.class.getResource(ENGLISH_MAPPING_CHINESE).getPath());
+        try (
+                final FileInputStream fileInputStream = new FileInputStream(file);
+                final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream , StandardCharsets.UTF_8)
+        ){
+            nameProperties.load(inputStreamReader);
+        } catch (IOException e) {
+            System.err.println("加载englishMappingChinese.properties文件失败");
+        }
     }
 
     private Pane initRootPane(){
@@ -265,6 +209,11 @@ public class EnsembleApp extends Application {
     private void initToolBar(){
         toolBar = new TitledToolBar();
         root.getChildren().add(toolBar);
+        initToolBarLeftItems();
+        initToolBarRightItems();
+    }
+
+    private void initToolBarLeftItems(){
         backButton = new Button();
         backButton.setId("back");
         backButton.getStyleClass().add("left-pill");
@@ -282,17 +231,102 @@ public class EnsembleApp extends Application {
         listButton.setId("list");
         listButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
         HBox.setMargin(listButton, new Insets(0, 0, 0, 7));
-        searchButton = new ToggleButton();
-        searchButton.setId("search");
-        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        searchBox.setPrefWidth(200);
         backButton.setGraphic(new Region());
         forwardButton.setGraphic(new Region());
         homeButton.setGraphic(new Region());
         listButton.setGraphic(new Region());
-        searchButton.setGraphic(new Region());
         toolBar.addLeftItems(navButtons,listButton);
+    }
+
+    private void initToolBarRightItems(){
+        searchButton = new ToggleButton();
+        searchButton.setId("search");
+        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        searchBox.setPrefWidth(200);
+        searchButton.setGraphic(new Region());
         toolBar.addRightItems(searchBox);
+    }
+
+    private void initPageBrowser(){
+        pageBrowser = new PageBrowser();
+        toolBar.titleTextProperty().bind(pageBrowser.currentPageTitleProperty());
+        root.getChildren().add(0, pageBrowser);
+        pageBrowser.goHome();
+    }
+
+    private void initToolBarBtns(){
+        initToolBarBtn(backButton , PageBrowser::backward , pageBrowser.backPossibleProperty().not());
+        initToolBarBtn(forwardButton , PageBrowser::forward , pageBrowser.forwardPossibleProperty().not());
+        initToolBarBtn(homeButton , PageBrowser::goHome , pageBrowser.atHomeProperty());
+        initToolBarListBtn();
+    }
+
+    private void initToolBarBtn(Button button , Consumer<PageBrowser> actionFunction , ObservableValue bindProperty){
+        button.setOnAction(e->actionFunction.accept(pageBrowser));
+        button.disableProperty().bind(bindProperty);
+    }
+    private void initToolBarListBtn(){
+        sampleListPopover = new Popover();
+        sampleListPopover.setPrefWidth(440);
+        root.getChildren().add(sampleListPopover);
+        rootPage = new SamplePopoverTreeList(Samples.ROOT,pageBrowser);
+        listButton.setOnMouseClicked((MouseEvent e) -> {
+            if(sampleListPopover.isVisible()){
+                sampleListPopover.hide();
+                return;
+            }
+            sampleListPopover.clearPages();
+            sampleListPopover.pushPage(rootPage);
+            sampleListPopover.show(() -> {
+                listButton.setSelected(false);
+            });
+        });
+    }
+
+    private void initAndroidStyle(){
+        root.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            private int exitCount = 0;
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    if (sampleListPopover.isVisible()) {
+                        sampleListPopover.hide();
+                        event.consume();
+                        return;
+                    }
+
+                    if (!backButton.isDisabled()) {
+                        pageBrowser.backward();
+                        event.consume();
+                        return;
+                    }
+                    exitCount++;
+                    if (exitCount == 2) {
+                        System.exit(0);
+                    }
+                } else {
+                    exitCount = 0;
+                }
+
+                if (event.getCode() == KeyCode.CONTEXT_MENU) {
+                    if (sampleListPopover.isVisible()) {
+                        sampleListPopover.hide();
+                    } else {
+                        sampleListPopover.clearPages();
+                        sampleListPopover.pushPage(rootPage);
+                        sampleListPopover.show(() -> {
+                            listButton.setSelected(false);
+                        });
+                    }
+                    event.consume();
+                }
+            }
+        });
+    }
+
+    private void initSearchPopover(){
+        searchPopover = new SearchPopover(searchBox,pageBrowser);
+        root.getChildren().add(searchPopover);
     }
 
     private RadioMenuItem screenSizeMenuItem(String text, final int width, final int height, final boolean retina, ToggleGroup tg) {

@@ -102,13 +102,10 @@ public class SampleInfo {
                   String[] docsUrls, String[] relatesSamplePaths, String mainFileUrl,
                   PlaygroundProperty[] playgroundProperties, ConditionalFeature[] conditionalFeatures,
                   boolean runsOnEmbedded) {
-        //TODO yzy 此处维护例子相关信息
-        final String property = EnsembleApp.nameProperties.getProperty(name.replace(" ", "_"));
-        if(StringUtils.isNoneEmpty(property)){
-            name = property;
-        }
-        this.name = name;
-        this.description = description;
+        //TODO yzy 替换英文为中文
+        //System.out.println(String.format("%s=" , replaceAllSpecialStr(description)));
+        this.name = translatorOfChinese(name);
+        this.description = translatorOfChinese(description);
         this.ensemblePath = ensemblePath;
         this.baseUri = baseUri;
         this.appClass = appClass;
@@ -138,6 +135,24 @@ public class SampleInfo {
         }
 
         this.previewUrl = previewUrl;
+    }
+
+    private String replaceAllSpecialStr(String key){
+        String replaceWith = "_";
+        String[] specials = {" " , ":" , "," , "."};
+        String replace = key;
+        for (String str : specials){
+            replace = replace.replace(str , replaceWith);
+        }
+        return replace;
+    }
+
+    private String translatorOfChinese(String key){
+        final String property = EnsembleApp.nameProperties.getProperty(replaceAllSpecialStr(key));
+        if(StringUtils.isNoneEmpty(property)){
+            key = property;
+        }
+        return key;
     }
 
     @Override public String toString() {
