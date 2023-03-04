@@ -33,16 +33,16 @@ package ensemble;
 
 import ensemble.playground.PlaygroundProperty;
 import ensemble.samplepage.SamplePage;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.AbstractList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.ConditionalFeature;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -55,6 +55,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Descriptor for a ensemble sample. Everything the ui needs is determined at
@@ -64,7 +65,6 @@ import javafx.scene.paint.Color;
 public class SampleInfo {
 
     // =============== BASICS ==================================================
-
     public final String name;
     public final String description;
     public final String ensemblePath;
@@ -102,6 +102,11 @@ public class SampleInfo {
                   String[] docsUrls, String[] relatesSamplePaths, String mainFileUrl,
                   PlaygroundProperty[] playgroundProperties, ConditionalFeature[] conditionalFeatures,
                   boolean runsOnEmbedded) {
+        //TODO yzy 此处维护例子相关信息
+        final String property = EnsembleApp.nameProperties.getProperty(name.replace(" ", "_"));
+        if(StringUtils.isNoneEmpty(property)){
+            name = property;
+        }
         this.name = name;
         this.description = description;
         this.ensemblePath = ensemblePath;
