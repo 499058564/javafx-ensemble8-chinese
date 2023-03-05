@@ -169,7 +169,7 @@ public class PageBrowser extends Region {
         if(null == sampleInfo){
             throw new UnsupportedOperationException("Unknown sample url ["+url+"]");
         }
-        return url.startsWith(SAMPLE_URL_PREFIX) ? updateSamplePage(sampleInfo, url):updateSourcePage(sampleInfo);
+        return updateSamplePage(sampleInfo, url);
     }
 
     private SourcePage urlForSampleSrcPage(String url){

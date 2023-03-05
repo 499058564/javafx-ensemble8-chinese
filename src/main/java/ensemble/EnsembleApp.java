@@ -149,13 +149,13 @@ public class EnsembleApp extends Application {
         ){
             nameProperties.load(inputStreamReader);
             //TODO yzy 测试使用-输出所有未翻译的部分
-            /*final Enumeration<Object> keys = nameProperties.keys();
+            final Enumeration<Object> keys = nameProperties.keys();
             while (keys.hasMoreElements()){
                 final Object o = keys.nextElement();
                 if(StringUtils.isEmpty(nameProperties.getProperty((String) o))){
                     System.out.println(((String)o).replace("_" , " "));
                 }
-            }*/
+            }
         } catch (IOException e) {
             System.err.println("加载englishMappingChinese.properties文件失败");
         }

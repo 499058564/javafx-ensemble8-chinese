@@ -7,7 +7,13 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2023/3/4
  **/
 public class ChineseAndEnglishController {
+
+    private static final boolean NOT_TRANSLATOR_OF_CHINESE = false;
+
     public static String translatorOfChinese(String key){
+        if(NOT_TRANSLATOR_OF_CHINESE){
+            return key;
+        }
         if(StringUtils.isEmpty(key)){
             return null;
         }
