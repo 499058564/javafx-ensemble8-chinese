@@ -103,11 +103,11 @@ public class SamplePopoverTreeList extends PopoverTreeList implements Popover.Pa
     }
 
     @Override public String getPageTitle() {
-        return "Samples";
+        return ChineseAndEnglishController.translatorOfChinese("Samples");
     }
 
     @Override public String leftButtonText() {
-        return category == Samples.ROOT ? null : "< Back";
+        return category == Samples.ROOT ? null : ChineseAndEnglishController.translatorOfChinese("< Back");
     }
 
     @Override public void handleLeftButton() {
@@ -115,7 +115,7 @@ public class SamplePopoverTreeList extends PopoverTreeList implements Popover.Pa
     }
 
     @Override public String rightButtonText() {
-        return "Done";
+        return ChineseAndEnglishController.translatorOfChinese("Done");
     }
 
     @Override public void handleRightButton() {
@@ -169,7 +169,9 @@ public class SamplePopoverTreeList extends PopoverTreeList implements Popover.Pa
                 arrow.setVisible(false);
                 icon.getStyleClass().clear();
             } else {
-                setText(item.toString());
+                //首页-示例列表弹窗的树型列表显示名称
+                //setText(item.toString());
+                setText(ChineseAndEnglishController.translatorOfChinese(item.toString()));
                 arrow.setVisible(true);
                 if (item instanceof SampleCategory) {
                     icon.getStyleClass().setAll("folder-icon");

@@ -36,17 +36,23 @@ import ensemble.control.Popover;
 import ensemble.control.SearchBox;
 import ensemble.control.TitledToolBar;
 import ensemble.generated.Samples;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -66,6 +72,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Scale;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -95,9 +103,16 @@ public class EnsembleApp extends Application {
     private ToggleButton searchButton;
     private final SearchBox searchBox = new SearchBox();
     private PageBrowser pageBrowser;
+    private SamplePopoverTreeList rootPage;
+    /**
+     * ToolBar中的列表按钮的弹出框
+     */
     private Popover sampleListPopover;
     private SearchPopover searchPopover;
     private MenuBar menuBar;
+
+    private static final String ENGLISH_MAPPING_CHINESE = "/nameEnglishMappingChinese.properties";
+    public static Properties nameProperties;
 
     static {
         System.setProperty("java.net.useSystemProxies", "true");
@@ -110,8 +125,36 @@ public class EnsembleApp extends Application {
     }
 
     @Override public void init() throws Exception {
-        // CREATE ROOT
-        root = new Pane() {
+        //加载英文到中文的映射配置
+        initMappingChinese();
+        root = initRootPane();
+        if (SHOW_MENU) {
+            initShowMenu();
+        }
+        initToolBar();
+        initPageBrowser();
+        initToolBarBtns();
+        if (IS_ANDROID) {
+            initAndroidStyle();
+        }
+       initSearchPopover();
+    }
+
+    private void initMappingChinese(){
+        nameProperties = new Properties();
+        File file = new File(EnsembleApp.class.getResource(ENGLISH_MAPPING_CHINESE).getPath());
+        try (
+                final FileInputStream fileInputStream = new FileInputStream(file);
+                final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream , StandardCharsets.UTF_8)
+        ){
+            nameProperties.load(inputStreamReader);
+        } catch (IOException e) {
+            System.err.println("加载englishMappingChinese.properties文件失败");
+        }
+    }
+
+    private Pane initRootPane(){
+        return new Pane() {
             @Override protected void layoutChildren() {
                 super.layoutChildren();
                 final double w = getWidth();
@@ -134,32 +177,38 @@ public class EnsembleApp extends Application {
                 searchPopover.setLayoutY((int)searchBoxBottomCenter.getY()+20);
             }
         };
-        // CREATE MENUBAR
-        if (SHOW_MENU) {
-            menuBar = new MenuBar();
-            menuBar.setUseSystemMenuBar(true);
-            ToggleGroup screenSizeToggle = new ToggleGroup();
-            Menu menu = new Menu("Screen size");
-            menu.getItems().addAll(
-                    screenSizeMenuItem("iPad Landscape", 1024, 768, false, screenSizeToggle),
-                    screenSizeMenuItem("iPad Portrait", 768, 1024, false, screenSizeToggle),
-                    screenSizeMenuItem("Beagleboard", 1024, 600, false, screenSizeToggle),
-                    screenSizeMenuItem("iPad Retina Landscape", 2048, 1536, true, screenSizeToggle),
-                    screenSizeMenuItem("iPad Retina Portrait", 1536, 2048, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone Landscape", 480, 320, false, screenSizeToggle),
-                    screenSizeMenuItem("iPhone Portrait", 320, 480, false, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 4 Landscape", 960, 640, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 4 Portrait", 640, 960, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 5 Landscape", 1136, 640, true, screenSizeToggle),
-                    screenSizeMenuItem("iPhone 5 Portrait", 640, 1136, true, screenSizeToggle));
-            menuBar.getMenus().add(menu);
-            screenSizeToggle.selectToggle(screenSizeToggle.getToggles().get(0));
+    }
 
-            root.getChildren().add(menuBar);
-        }
-        // CREATE TOOLBAR
+    private void initShowMenu(){
+        menuBar = new MenuBar();
+        menuBar.setUseSystemMenuBar(true);
+        ToggleGroup screenSizeToggle = new ToggleGroup();
+        Menu menu = new Menu("Screen size");
+        menu.getItems().addAll(
+                screenSizeMenuItem("iPad Landscape", 1024, 768, false, screenSizeToggle),
+                screenSizeMenuItem("iPad Portrait", 768, 1024, false, screenSizeToggle),
+                screenSizeMenuItem("Beagleboard", 1024, 600, false, screenSizeToggle),
+                screenSizeMenuItem("iPad Retina Landscape", 2048, 1536, true, screenSizeToggle),
+                screenSizeMenuItem("iPad Retina Portrait", 1536, 2048, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone Landscape", 480, 320, false, screenSizeToggle),
+                screenSizeMenuItem("iPhone Portrait", 320, 480, false, screenSizeToggle),
+                screenSizeMenuItem("iPhone 4 Landscape", 960, 640, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 4 Portrait", 640, 960, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 5 Landscape", 1136, 640, true, screenSizeToggle),
+                screenSizeMenuItem("iPhone 5 Portrait", 640, 1136, true, screenSizeToggle));
+        menuBar.getMenus().add(menu);
+        screenSizeToggle.selectToggle(screenSizeToggle.getToggles().get(0));
+        root.getChildren().add(menuBar);
+    }
+
+    private void initToolBar(){
         toolBar = new TitledToolBar();
         root.getChildren().add(toolBar);
+        initToolBarLeftItems();
+        initToolBarRightItems();
+    }
+
+    private void initToolBarLeftItems(){
         backButton = new Button();
         backButton.setId("back");
         backButton.getStyleClass().add("left-pill");
@@ -177,98 +226,102 @@ public class EnsembleApp extends Application {
         listButton.setId("list");
         listButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
         HBox.setMargin(listButton, new Insets(0, 0, 0, 7));
-        searchButton = new ToggleButton();
-        searchButton.setId("search");
-        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
-        searchBox.setPrefWidth(200);
         backButton.setGraphic(new Region());
         forwardButton.setGraphic(new Region());
         homeButton.setGraphic(new Region());
         listButton.setGraphic(new Region());
-        searchButton.setGraphic(new Region());
         toolBar.addLeftItems(navButtons,listButton);
-        toolBar.addRightItems(searchBox);
+    }
 
-        // create PageBrowser
+    private void initToolBarRightItems(){
+        searchButton = new ToggleButton();
+        searchButton.setId("search");
+        searchButton.setPrefSize(TOOL_BAR_BUTTON_SIZE, TOOL_BAR_BUTTON_SIZE);
+        searchBox.setPrefWidth(200);
+        searchButton.setGraphic(new Region());
+        toolBar.addRightItems(searchBox);
+    }
+
+    private void initPageBrowser(){
         pageBrowser = new PageBrowser();
         toolBar.titleTextProperty().bind(pageBrowser.currentPageTitleProperty());
         root.getChildren().add(0, pageBrowser);
         pageBrowser.goHome();
-        // wire nav buttons
-        backButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.backward();
-        });
-        backButton.disableProperty().bind(pageBrowser.backPossibleProperty().not());
-        forwardButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.forward();
-        });
-        forwardButton.disableProperty().bind(pageBrowser.forwardPossibleProperty().not());
-        homeButton.setOnAction((ActionEvent event) -> {
-            pageBrowser.goHome();
-        });
-        homeButton.disableProperty().bind(pageBrowser.atHomeProperty());
+    }
 
-        // create and setup list popover
+    private void initToolBarBtns(){
+        initToolBarBtn(backButton , PageBrowser::backward , pageBrowser.backPossibleProperty().not());
+        initToolBarBtn(forwardButton , PageBrowser::forward , pageBrowser.forwardPossibleProperty().not());
+        initToolBarBtn(homeButton , PageBrowser::goHome , pageBrowser.atHomeProperty());
+        initToolBarListBtn();
+    }
+
+    private void initToolBarBtn(Button button , Consumer<PageBrowser> actionFunction , ObservableValue bindProperty){
+        button.setOnAction(e->actionFunction.accept(pageBrowser));
+        button.disableProperty().bind(bindProperty);
+    }
+    private void initToolBarListBtn(){
         sampleListPopover = new Popover();
         sampleListPopover.setPrefWidth(440);
         root.getChildren().add(sampleListPopover);
-        final SamplePopoverTreeList rootPage = new SamplePopoverTreeList(Samples.ROOT,pageBrowser);
+        //首页的示例列表
+        rootPage = new SamplePopoverTreeList(Samples.ROOT,pageBrowser);
         listButton.setOnMouseClicked((MouseEvent e) -> {
-            if (sampleListPopover.isVisible()) {
+            if(sampleListPopover.isVisible()){
                 sampleListPopover.hide();
-            } else {
-                sampleListPopover.clearPages();
-                sampleListPopover.pushPage(rootPage);
-                sampleListPopover.show(() -> {
-                    listButton.setSelected(false);
-                });
+                return;
+            }
+            sampleListPopover.clearPages();
+            //将页面放置进入列表的时候才会进行初始化
+            sampleListPopover.pushPage(rootPage);
+            sampleListPopover.show(() -> {
+                listButton.setSelected(false);
+            });
+        });
+    }
+
+    private void initAndroidStyle(){
+        root.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            private int exitCount = 0;
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    if (sampleListPopover.isVisible()) {
+                        sampleListPopover.hide();
+                        event.consume();
+                        return;
+                    }
+
+                    if (!backButton.isDisabled()) {
+                        pageBrowser.backward();
+                        event.consume();
+                        return;
+                    }
+                    exitCount++;
+                    if (exitCount == 2) {
+                        System.exit(0);
+                    }
+                } else {
+                    exitCount = 0;
+                }
+
+                if (event.getCode() == KeyCode.CONTEXT_MENU) {
+                    if (sampleListPopover.isVisible()) {
+                        sampleListPopover.hide();
+                    } else {
+                        sampleListPopover.clearPages();
+                        sampleListPopover.pushPage(rootPage);
+                        sampleListPopover.show(() -> {
+                            listButton.setSelected(false);
+                        });
+                    }
+                    event.consume();
+                }
             }
         });
+    }
 
-        // create AndroidStyle menu handling
-        if (IS_ANDROID) {
-            root.setOnKeyReleased(new EventHandler<KeyEvent>() {
-                private int exitCount = 0;
-
-                @Override
-                public void handle(KeyEvent event) {
-                    if (event.getCode() == KeyCode.ESCAPE) {
-                        if (sampleListPopover.isVisible()) {
-                            sampleListPopover.hide();
-                            event.consume();
-                            return;
-                        }
-
-                        if (!backButton.isDisabled()) {
-                            pageBrowser.backward();
-                            event.consume();
-                            return;
-                        }
-                        exitCount++;
-                        if (exitCount == 2) {
-                            System.exit(0);
-                        }
-                    } else {
-                        exitCount = 0;
-                    }
-
-                    if (event.getCode() == KeyCode.CONTEXT_MENU) {
-                        if (sampleListPopover.isVisible()) {
-                            sampleListPopover.hide();
-                        } else {
-                            sampleListPopover.clearPages();
-                            sampleListPopover.pushPage(rootPage);
-                            sampleListPopover.show(() -> {
-                                listButton.setSelected(false);
-                            });
-                        }
-                        event.consume();
-                    }
-                }
-            });
-        }
-
-        // create and setup search popover
+    private void initSearchPopover(){
         searchPopover = new SearchPopover(searchBox,pageBrowser);
         root.getChildren().add(searchPopover);
     }
@@ -313,7 +366,7 @@ public class EnsembleApp extends Application {
                 URL url = new URL(EXTERNAL_STYLESHEET);
                 try (
                         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-                        Reader newReader = Channels.newReader(rbc, "ISO-8859-1");
+                        Reader newReader = Channels.newReader(rbc, "UTF-8");
                         BufferedReader bufferedReader = new BufferedReader(newReader)
                         ) {
                     // Checking whether we can read a line from this url
@@ -352,6 +405,7 @@ public class EnsembleApp extends Application {
         }
         stage.setTitle("Ensemble");
         stage.show();
+
     }
 
     /**

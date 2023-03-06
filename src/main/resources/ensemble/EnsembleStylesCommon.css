@@ -38,7 +38,8 @@
     -fx-page-information-visible: false;
 }
 .section-ribbon-text {
-    -fx-font-family: "Source Sans Pro ExtraLight";
+    /*-fx-font-family: "Source Sans Pro ExtraLight";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 36;
     -fx-fill: white;
 }
@@ -47,7 +48,8 @@
     -fx-background-insets: 10 0 10 0;
 }
 .sample-button {
-    -fx-font-family: "Source Sans Pro";
+    /*-fx-font-family: "Source Sans Pro";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 14;
     -fx-padding: 5px;
     -fx-text-fill: #777777;
@@ -62,7 +64,8 @@
    * DOCS PAGE
    ****************************************************************************/
 .sidebar-title {
-    -fx-font-family: "Source Sans Pro Light";
+    /*-fx-font-family: "Source Sans Pro Light";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 20 !important;
     -fx-text-fill: #f3472f;
 }
@@ -80,7 +83,8 @@
     -fx-text-overrun: leading-word-ellipsis;
 }
 .sample-page-box-title {
-    -fx-font-family: "Source Sans Pro Light";
+    /*-fx-font-family: "Source Sans Pro Light";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 20 !important;
     -fx-text-fill: #f3472f;
     -fx-fill: #f3472f;
@@ -111,13 +115,15 @@
 }
 .popover-title {
     /*-fx-font-family: "Bree serif"; */
-    -fx-font-family: "Source Sans Pro Light";
+    /*-fx-font-family: "Source Sans Pro Light";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 20px;
  /*   -fx-text-fill: white;
     -fx-font-weight: bold; */
 }
 .popover .button {
-    -fx-font-family: "Source Sans Pro";
+    /*-fx-font-family: "Source Sans Pro";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 16px;
 }
 .popover-tree-list-cell {
@@ -151,7 +157,8 @@
     -fx-text-fill: #444444;
 }
 .search-icon-pane .label {
-    -fx-font-family: "Source Sans Pro Semibold";
+    /*-fx-font-family: "Source Sans Pro Semibold";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 16px;
     -fx-background-color: #515151;
     -fx-background-radius: 3px;
@@ -187,7 +194,8 @@
 }
 
 .ensmeble-tool-bar .title {
-    -fx-font-family: "Source Sans Pro Light";
+    /*-fx-font-family: "Source Sans Pro Light";*/
+    -fx-font-family: "Microsoft YaHei";
     -fx-font-size: 20;
     -fx-text-fill: #666;
 }

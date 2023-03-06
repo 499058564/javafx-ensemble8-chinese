@@ -33,16 +33,16 @@ package ensemble;
 
 import ensemble.playground.PlaygroundProperty;
 import ensemble.samplepage.SamplePage;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.AbstractList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.ConditionalFeature;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -55,6 +55,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Descriptor for a ensemble sample. Everything the ui needs is determined at
@@ -64,8 +65,8 @@ import javafx.scene.paint.Color;
 public class SampleInfo {
 
     // =============== BASICS ==================================================
-
     public final String name;
+    public final String displayName;
     public final String description;
     public final String ensemblePath;
 
@@ -102,8 +103,9 @@ public class SampleInfo {
                   String[] docsUrls, String[] relatesSamplePaths, String mainFileUrl,
                   PlaygroundProperty[] playgroundProperties, ConditionalFeature[] conditionalFeatures,
                   boolean runsOnEmbedded) {
+        this.displayName = ChineseAndEnglishController.translatorOfChinese(name);
         this.name = name;
-        this.description = description;
+        this.description = ChineseAndEnglishController.translatorOfChinese(description);
         this.ensemblePath = ensemblePath;
         this.baseUri = baseUri;
         this.appClass = appClass;
@@ -134,6 +136,8 @@ public class SampleInfo {
 
         this.previewUrl = previewUrl;
     }
+
+
 
     @Override public String toString() {
         return name;
@@ -226,6 +230,10 @@ public class SampleInfo {
     }
     private static final Image SAMPLE_BACKGROUND = getImage(
             SampleInfo.class.getResource("images/sample-background.png").toExternalForm());
+
+    /**
+     * 首页中的轮播图
+     */
     private class LargePreviewRegion extends Region {
         private final Node sampleNode = buildSampleNode().getSampleNode();
         private final Label label = new Label();
@@ -233,7 +241,9 @@ public class SampleInfo {
 
         public LargePreviewRegion() {
             getStyleClass().add("sample-large-preview");
-            label.setText(name);
+            //首页轮播图各项的显示名称
+            //label.setText(name);
+            label.setText(displayName);
             label.getStyleClass().add("sample-large-preview-label");
             label.setAlignment(Pos.BOTTOM_CENTER);
             label.setWrapText(true);

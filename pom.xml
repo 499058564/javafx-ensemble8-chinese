@@ -18,10 +18,43 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.css</include>
+                    <include>**/*.png</include>
+                    <include>**/*.fdt</include>
+                    <include>**/*.fdx</include>
+                    <include>**/*.fnm</include>
+                    <include>**/*.frq</include>
+                    <include>**/*.nrm</include>
+                    <include>**/*.prx</include>
+                    <include>**/*.tii</include>
+                    <include>**/*.tis</include>
+                    <include>**/*.jpg</include>
+                    <include>**/*.fxml</include>
+                    <include>**/*.wav</include>
+                    <include>**/*.gif</include>
+                    <include>**/*.gen</include>
+                    <include>**/*.js</include>
+                    <include>**/segments_1</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <properties>
         <lucene.version>4.9.0</lucene.version>
+        <commons-io-version>2.11.0</commons-io-version>
+        <commons-lang3-version>3.12.0</commons-lang3-version>
     </properties>
 
     <dependencies>
@@ -83,6 +116,16 @@
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-grouping</artifactId>
             <version>3.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io-version}</version>
         </dependency>
     </dependencies>
 

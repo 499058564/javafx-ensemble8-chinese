@@ -41,9 +41,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.LinkedList;
 import ensemble.generated.Samples;
 import ensemble.samplepage.SamplePage;
+import org.apache.commons.lang3.StringUtils;
+import sun.net.util.URLUtil;
 
 /**
  * Sample page navigation with history.
@@ -52,6 +57,11 @@ import ensemble.samplepage.SamplePage;
  */
 public class PageBrowser extends Region {
     public static final String HOME_URL = "home";
+    private static final String WEB_URL_PREFIX_HTTP = "http://";
+    private static final String WEB_URL_PREFIX_HTTPS = "https://";
+    private static final String SAMPLE_URL_PREFIX = "sample://";
+    private static final String SAMPLE_URL_PREFIX_SRC = "sample-src://";
+
     private HomePage homePage;
     private Page currentPage;
     private SamplePage samplePage;
@@ -117,63 +127,86 @@ public class PageBrowser extends Region {
 
     private void goToPage(String url, SampleInfo sample, boolean updateHistory) {
         Page nextPage = null;
-        // get node for page
         if (url.equals(HOME_URL)) {
             nextPage = getHomePage();
-        } else if (url.startsWith("http://") || url.startsWith("https://")) {
-            if (WEB_SUPPORTED) {
-                nextPage = updateDocsPage(url);
-            } else {
-                System.err.println("Web pages are not supported and links to them should be disabled!");
-            }
-        } else if (sample != null) {
+        }
+        if(isWebUrl(url)){
+            nextPage = updateDocsPage(url);
+        }
+        if(url.startsWith(SAMPLE_URL_PREFIX)){
+            nextPage = urlForSamplePage(url);
+        }
+        if(url.startsWith(SAMPLE_URL_PREFIX_SRC)){
+            nextPage = urlForSampleSrcPage(url);
+        }
+        if(null == nextPage && null != sample){
             nextPage = updateSamplePage(sample, url);
-        } else if (url.startsWith("sample://")) {
-            String samplePath = url.substring("sample://".length());
-            if (samplePath.contains("?")) {
-                samplePath = samplePath.substring(0, samplePath.indexOf('?') - 1);
-            }
-            sample = Samples.ROOT.sampleForPath(samplePath);
-            if (sample != null) {
-                nextPage = updateSamplePage(sample, url);
-            } else {
-                throw new UnsupportedOperationException("Unknown sample url ["+url+"]");
-            }
-        } else if (url.startsWith("sample-src://")) {
-            String samplePath = url.substring("sample-src://".length());
-            if (samplePath.contains("?")) {
-                samplePath = samplePath.substring(0, samplePath.indexOf('?') - 1);
-            }
-            sample = Samples.ROOT.sampleForPath(samplePath);
-            if (sample != null) {
-                nextPage = updateSourcePage(sample);
-            } else {
-                System.err.println("Unknown sample url [" + url + "]");
-            }
-        } else {
+        }
+        if(null == nextPage){
             System.err.println("Unknown ensemble page url [" + url + "]");
+            return;
         }
-        if (nextPage != null) {
-            // update history
-            if (updateHistory) {
-                if (currentPageUrl != null) {
-                    pastHistory.push(getCurrentPageUrl());
-                }
-                futureHistory.clear();
-            }
-            currentPageUrl = url;
-            // remove old page
-            if (currentPage != null) {
-                getChildren().remove((Node) currentPage);
-            }
-            currentPage = nextPage;
-            getChildren().add(currentPage.getNode());
-            // update properties
-            atHome.set(url.equals(HOME_URL));
-            forwardPossible.set(!futureHistory.isEmpty());
-            backPossible.set(!pastHistory.isEmpty());
-            currentPageTitle.bind(currentPage.titleProperty());
+        if (updateHistory) {
+            updateHistory();
         }
+        removeOldPageAndUpdateCurrentPage(url , nextPage);
+        goToPageAfterUpdateProperties();
+    }
+    private boolean isWebUrl(String url){
+        boolean webNotSupported = !WEB_SUPPORTED;
+        if(webNotSupported){
+            System.err.println("Web pages are not supported and links to them should be disabled!");
+            return false;
+        }
+        boolean isWebUrl = url.startsWith(WEB_URL_PREFIX_HTTP) || url.startsWith(WEB_URL_PREFIX_HTTPS);
+        return  isWebUrl;
+    }
+
+    private Page urlForSamplePage(String url){
+        final SampleInfo sampleInfo = getSampleInfoByUrl(url , SAMPLE_URL_PREFIX);
+        if(null == sampleInfo){
+            throw new UnsupportedOperationException("Unknown sample url ["+url+"]");
+        }
+        return updateSamplePage(sampleInfo, url);
+    }
+
+    private SourcePage urlForSampleSrcPage(String url){
+        final SampleInfo sampleInfo = getSampleInfoByUrl(url , SAMPLE_URL_PREFIX_SRC);
+        if(null == sampleInfo){
+            throw new UnsupportedOperationException("Unknown sample url ["+url+"]");
+        }
+        return updateSourcePage(sampleInfo);
+    }
+
+    private SampleInfo getSampleInfoByUrl(String url , String sanpleUrlPrefix){
+        String samplePath = url.substring(sanpleUrlPrefix.length());
+        if (samplePath.contains("?")) {
+            samplePath = samplePath.substring(0, samplePath.indexOf('?') - 1);
+        }
+        return Samples.ROOT.sampleForPath(samplePath);
+    }
+
+    private void updateHistory(){
+        if (currentPageUrl != null) {
+            pastHistory.push(getCurrentPageUrl());
+        }
+        futureHistory.clear();
+    }
+
+    private void removeOldPageAndUpdateCurrentPage(String url , Page nextPage){
+        currentPageUrl = url;
+        if (currentPage != null) {
+            getChildren().remove((Node) currentPage);
+        }
+        currentPage = nextPage;
+        getChildren().add(currentPage.getNode());
+    }
+
+    private void goToPageAfterUpdateProperties(){
+        atHome.set(currentPageUrl.equals(HOME_URL));
+        forwardPossible.set(!futureHistory.isEmpty());
+        backPossible.set(!pastHistory.isEmpty());
+        currentPageTitle.bind(currentPage.titleProperty());
     }
 
     @Override protected void layoutChildren() {

@@ -34,6 +34,7 @@ package ensemble.samplepage;
 
 import static ensemble.samplepage.SamplePageContent.*;
 
+import ensemble.ChineseAndEnglishController;
 import javafx.geometry.Pos;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -48,7 +49,7 @@ public class PlaygroundNode extends VBox {
         PlaygroundTabs playgroundTabs = new PlaygroundTabs(samplePage);
         setAlignment(Pos.TOP_LEFT);
         getChildren().setAll(
-                title("PLAYGROUND"),
+                title(ChineseAndEnglishController.translatorOfChinese("PLAYGROUND")),
                 playgroundTabs);
         VBox.setVgrow(playgroundTabs, Priority.ALWAYS);
         getStyleClass().add("sample-page-box");

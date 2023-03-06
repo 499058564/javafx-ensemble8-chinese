@@ -31,6 +31,7 @@
  */
 package ensemble.samplepage;
 
+import ensemble.ChineseAndEnglishController;
 import ensemble.EnsembleApp;
 import ensemble.PlatformFeatures;
 import ensemble.SampleInfo;
@@ -67,7 +68,7 @@ public class Description extends VBox {
         getStyleClass().add("sample-page-box");
 
         // Add Description
-        Text descriptionTitle = title("DESCRIPTION");
+        Text descriptionTitle = title(ChineseAndEnglishController.translatorOfChinese("DESCRIPTION"));
         description = new Label();
         description.setWrapText(true);
         description.setMinHeight(Label.USE_PREF_SIZE);
@@ -75,7 +76,7 @@ public class Description extends VBox {
         getChildren().addAll(descriptionTitle,description);
 
         // Add View Source Hyperlink
-        Hyperlink sourceBtn = new Hyperlink("VIEW SOURCE");
+        Hyperlink sourceBtn = new Hyperlink(ChineseAndEnglishController.translatorOfChinese("VIEW SOURCE"));
         sourceBtn.getStyleClass().add("sample-page-box-title");
         sourceBtn.setGraphic(new ImageView(ORANGE_ARROW));
         sourceBtn.setContentDisplay(ContentDisplay.RIGHT);
@@ -96,7 +97,7 @@ public class Description extends VBox {
             gridPane.getColumnConstraints().addAll(leftColumn, rightColumn);
 
             // Add Related Documents
-            Text relatedDocumentsTitle = title("RELATED DOCUMENTS");
+            Text relatedDocumentsTitle = title(ChineseAndEnglishController.translatorOfChinese("RELATED DOCUMENTS"));
             GridPane.setConstraints(relatedDocumentsTitle, 0, 0);
             relatedDocumentsList = new VBox();
             ScrollPane relatedDocumentsScrollPane = new ScrollPane(relatedDocumentsList);
@@ -108,7 +109,7 @@ public class Description extends VBox {
             relatedDocumentsScrollPane.getStyleClass().clear();
 
             // Add Related Samples
-            Text relatedSamplesTitle = title("RELATED SAMPLES");
+            Text relatedSamplesTitle = title(ChineseAndEnglishController.translatorOfChinese("RELATED SAMPLES"));
             GridPane.setConstraints(relatedSamplesTitle, 1, 0);
             relatedSamples = new VBox();
             GridPane.setConstraints(relatedSamples, 1, 1);
@@ -119,7 +120,7 @@ public class Description extends VBox {
                     relatedSamplesTitle,
                     relatedSamples);
         } else {
-            Text relatedSamplesTitle = title("RELATED SAMPLES");
+            Text relatedSamplesTitle = title(ChineseAndEnglishController.translatorOfChinese("RELATED SAMPLES"));
             relatedSamples = new VBox();
             getChildren().addAll(relatedSamplesTitle, relatedSamples);
             relatedDocumentsList = null;

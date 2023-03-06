@@ -64,9 +64,22 @@ public class SourcePage extends TabPane implements Page {
     public void setSampleInfo(SampleInfo sampleInfo) {
         sampleInfoProperty.set(sampleInfo);
         getTabs().clear();
-        for (SampleInfo.URL sourceURL : sampleInfo.getSources()) {
+        //调整查看源文件逻辑:只显示主要源文件
+        getTabs().add(new SourceTab(new SampleInfo.URL() {
+            @Override
+            public String getURL() {
+                return sampleInfo.mainFileUrl;
+            }
+
+            @Override
+            public String getName() {
+                String url = getURL();
+                return url.substring(url.lastIndexOf('/') + 1);
+            }
+        }));
+        /*for (SampleInfo.URL sourceURL : sampleInfo.getSources()) {
             getTabs().add(new SourceTab(sourceURL));
-        }
+        }*/
     }
 
     @Override public ReadOnlyStringProperty titleProperty() {
