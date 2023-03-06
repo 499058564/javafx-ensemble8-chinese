@@ -68,7 +68,7 @@ public class SamplePage extends StackPane implements Page {
             @Override protected String computeValue() {
                 SampleInfo sample = SamplePage.this.sampleInfoProperty.get();
                 if (sample != null) {
-                    //TODO yzy 示例页面标题
+                    //示例页面标题
                     //return sample.name;
                     return sample.displayName;
                 } else {

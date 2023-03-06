@@ -216,7 +216,6 @@ public class HomePage extends ListView<HomePage.HomePageRow> implements Callback
             } else {
                 switch (item.rowType) {
                     case Highlights:
-                        //TODO yzy 轮播图
                         if (oldRowType != RowType.Highlights) {
                             height = HIGHLIGHTS_HEIGHT;
                             Pagination pagination = paginationCache == null ? null
@@ -243,7 +242,7 @@ public class HomePage extends ListView<HomePage.HomePageRow> implements Callback
                         height = RIBBON_HEIGHT;
                         SectionRibbon ribbon = ribbonsCache.get(item.title);
                         if (ribbon == null) {
-                            //TODO yzy 首页示例项分类标题
+                            //首页示例项分类标题
                             //ribbon = new SectionRibbon(item.title.toUpperCase());
                             ribbon = new SectionRibbon(item.displayTitle.toUpperCase());
                             ribbonsCache.put(item.title, ribbon);
@@ -262,7 +261,7 @@ public class HomePage extends ListView<HomePage.HomePageRow> implements Callback
                                 sampleButton = new Button();
                                 sampleButton.getStyleClass().setAll("sample-button");
                                 sampleButton.setContentDisplay(ContentDisplay.TOP);
-                                //TODO yzy 首页各示例项的标题
+                                //首页各示例项的标题
                                 //sampleButton.setText(sample.name);
                                 sampleButton.setText(sample.displayName);
                                 sampleButton.setGraphic(sample.getMediumPreview());
@@ -308,10 +307,8 @@ public class HomePage extends ListView<HomePage.HomePageRow> implements Callback
 
         private HomePageRow(RowType rowType, String title, SampleInfo[] samples) {
             this.rowType = rowType;
-            //TODO yzy 首页示例项的分类标题
             this.title = title;
             this.displayTitle = ChineseAndEnglishController.translatorOfChinese(title);
-
             this.samples = samples;
         }
 

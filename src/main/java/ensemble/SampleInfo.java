@@ -66,7 +66,6 @@ public class SampleInfo {
 
     // =============== BASICS ==================================================
     public final String name;
-    //TODO yzy 增加显示名称,防止原有逻辑被更改
     public final String displayName;
     public final String description;
     public final String ensemblePath;
@@ -104,9 +103,6 @@ public class SampleInfo {
                   String[] docsUrls, String[] relatesSamplePaths, String mainFileUrl,
                   PlaygroundProperty[] playgroundProperties, ConditionalFeature[] conditionalFeatures,
                   boolean runsOnEmbedded) {
-        //TODO yzy 替换英文为中文
-
-        //TODO yzy 显示名称初始化
         this.displayName = ChineseAndEnglishController.translatorOfChinese(name);
         this.name = name;
         this.description = ChineseAndEnglishController.translatorOfChinese(description);
@@ -245,7 +241,7 @@ public class SampleInfo {
 
         public LargePreviewRegion() {
             getStyleClass().add("sample-large-preview");
-            //TODO yzy 首页轮播图各项的显示名称
+            //首页轮播图各项的显示名称
             //label.setText(name);
             label.setText(displayName);
             label.getStyleClass().add("sample-large-preview-label");

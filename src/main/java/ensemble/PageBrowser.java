@@ -127,7 +127,6 @@ public class PageBrowser extends Region {
 
     private void goToPage(String url, SampleInfo sample, boolean updateHistory) {
         Page nextPage = null;
-        //TODO yzy 重构
         if (url.equals(HOME_URL)) {
             nextPage = getHomePage();
         }
@@ -147,7 +146,6 @@ public class PageBrowser extends Region {
             System.err.println("Unknown ensemble page url [" + url + "]");
             return;
         }
-        // update history
         if (updateHistory) {
             updateHistory();
         }

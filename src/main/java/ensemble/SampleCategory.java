@@ -40,7 +40,6 @@ import ensemble.util.FeatureChecker;
  */
 public class SampleCategory {
     public final String name;
-    //TODO yzy 增加显示名称,防止原有逻辑被更改
     public final String displayName;
     /* samples contained in this category directly */
     public final SampleInfo[] samples;
